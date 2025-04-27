@@ -1,6 +1,10 @@
-from typing import Union
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 
-from fastapi import FastAPI
+from utils.enum import AI_Model
+
+from core.podcast import AI_Podcast
+from core.schema import PodcastQuery
 
 app = FastAPI()
 
@@ -10,6 +14,17 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.post("/podcast")
+def read_item(podcast_q:PodcastQuery):
+    try:
+        payload= {
+            'user_prompt': podcast_q.user
+        }
+        ai_podcast =AI_Podcast(payload=payload, model=AI_Model.AI_ML.value)
+        resp = ai_podcast.start()
+        return {
+                "message": "AI message received",
+                "data": resp
+                }
+    except Exception as e:
+        return JSONResponse(status_code=500, content=str(e))
