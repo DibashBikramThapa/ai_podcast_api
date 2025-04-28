@@ -5,7 +5,7 @@ from utils.settings import HOST
 
 base_url = f"{HOST}/v1"
 api_key = AI_API_KEYS.AI_ML.value
-system_prompt = "You are a guest in ai text podcast. Provide your opinion in user and other ai guest's opinions."
+system_prompt = "Act like a human in a podcast. Provide your opinions and more insights on other assistant content."
 api = OpenAI(api_key=api_key, base_url=base_url)
 
 
@@ -64,6 +64,6 @@ class AI_Podcast:
                 payload['prev_prompt'] = list(model_podcast_resp.values())
 
                 model_podcast_resp[model.value] = AI_Podcast(payload=payload, model=model.value).execute()
-        return model_podcast_resp
+        return [model_podcast_resp]
 
 
