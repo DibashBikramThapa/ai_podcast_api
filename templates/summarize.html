@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Question Summarizer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#F0F7FF",
+                100: "#E0EFFF",
+                200: "#C0DFFF",
+                300: "#90C8FF",
+                400: "#5AA6FF",
+                500: "#2185FF",
+                600: "#0065E0",
+                700: "#0052B3",
+                800: "#004299",
+                900: "#003380",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* Custom scrollbar for better visual appeal */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* Animations */
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Tabs styling */
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+      
+      /* Beautify the combined response */
+      .combined-response h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        margin-bottom: 0.75rem;
+        color: #1e3a8a;
+      }
+      
+      .combined-response h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        color: #1e40af;
+      }
+      
+      .combined-response h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-top: 0.75rem;
+        margin-bottom: 0.5rem;
+        color: #1e40af;
+      }
+      
+      .combined-response p {
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+      }
+      
+      .combined-response ul, .combined-response ol {
+        margin-bottom: 1rem;
+        margin-left: 1.5rem;
+      }
+      
+      .combined-response ul {
+        list-style-type: disc;
+      }
+      
+      .combined-response ol {
+        list-style-type: decimal;
+      }
+      
+      .combined-response li {
+        margin-bottom: 0.25rem;
+        line-height: 1.6;
+      }
+      
+      /* Code blocks */
+      .combined-response pre {
+        background-color: #f1f5f9;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        overflow-x: auto;
+      }
+      
+      .combined-response code {
+        font-family: monospace;
+        font-size: 0.9rem;
+      }
+      
+      /* Tables */
+      .combined-response table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+      }
+      
+      .combined-response th, .combined-response td {
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem;
+      }
+      
+      .combined-response th {
+        background-color: #f1f5f9;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 h-screen flex overflow-hidden font-sans">
+    <!-- Sidebar -->
+    <div
+      class="w-64 bg-primary-800 text-white flex flex-col h-screen transition-all duration-300 shadow-lg"
+      id="sidebar"
+    >
+      <div class="p-4 border-b border-primary-700 flex items-center">
+        <i class="fas fa-brain text-2xl mr-3 text-primary-300"></i>
+        <h1 class="text-xl font-semibold">Navigation</h1>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <!-- Navigation Menu -->
+        <div class="p-4">
+          <h2 class="text-primary-300 text-xs font-semibold uppercase tracking-wider mb-3">
+            AI Tools
+          </h2>
+          <nav>
+            <a href="/" class="flex items-center px-4 py-3 text-white hover:bg-primary-700 rounded-md mb-1 transition-colors">
+              <i class="fas fa-podcast mr-3"></i>
+              <span>AI Podcast</span>
+            </a>
+            <a href="/summarize-page" class="flex items-center px-4 py-3 text-white bg-primary-700 rounded-md mb-1">
+              <i class="fas fa-search-plus mr-3"></i>
+              <span>AI Summarizer</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-primary-700 text-sm text-primary-300">
+        <p>Select a tool from the menu above to use different AI capabilities.</p>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <!-- Header -->
+      <header
+        class="bg-white shadow-sm p-4 flex items-center justify-between border-b border-gray-200"
+      >
+        <div class="flex items-center">
+          <button
+            id="toggle-sidebar"
+            class="mr-4 text-gray-500 hover:text-primary-600 p-1 rounded-md"
+          >
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <div class="flex items-center">
+            <i class="fas fa-search-plus text-primary-500 text-2xl mr-3"></i>
+            <h1 class="text-2xl font-semibold text-gray-800">
+              AI Question Summarizer
+            </h1>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto p-6 bg-gray-50" id="content-area">
+        <div class="max-w-5xl mx-auto">
+          <div class="mb-8 fade-in">
+            <h2
+              class="text-xl font-semibold mb-2 text-gray-800 flex items-center"
+            >
+              <i class="fas fa-question-circle text-primary-500 mr-2"></i>
+              Ask a Question
+            </h2>
+            <div
+              class="bg-white rounded-lg shadow-sm p-5 border border-gray-100"
+            >
+              <textarea
+                id="question-input"
+                class="w-full p-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 resize-none"
+                rows="4"
+                placeholder="Enter a question or topic for AI analysis..."
+              ></textarea>
+              <div class="flex justify-between items-center mt-4">
+                <div class="text-gray-500 text-sm">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  All AI models will respond and results will be combined
+                </div>
+                <button
+                  id="summarize-btn"
+                  class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-md flex items-center font-medium transition-colors duration-200 shadow-sm"
+                >
+                  <span>Generate Summary</span>
+                  <i class="fas fa-search-plus ml-2"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading indicator -->
+          <div id="loading" class="hidden fade-in">
+            <div
+              class="flex flex-col items-center justify-center p-10 bg-white rounded-lg shadow-sm border border-gray-100"
+            >
+              <div
+                class="animate-spin rounded-full h-14 w-14 border-t-2 border-b-2 border-primary-600 mb-4"
+              ></div>
+              <span class="text-lg font-medium text-gray-700"
+                >Generating AI responses...</span
+              >
+              <p class="text-gray-500 text-sm mt-2">
+                This may take a few moments
+              </p>
+            </div>
+          </div>
+
+          <!-- Results area -->
+          <div id="results" class="hidden fade-in">
+            <div class="mb-6">
+              <h2 class="text-xl font-semibold mb-2 text-gray-800 flex items-center">
+                <i class="fas fa-clipboard-check text-primary-500 mr-2"></i>
+                Results for: <span id="question-display" class="ml-2 text-primary-700"></span>
+              </h2>
+              
+              <!-- Tabs -->
+              <div class="mb-6 border-b border-gray-200">
+                <ul class="flex -mb-px">
+                  <li class="mr-2">
+                    <button id="combined-tab" class="tab-btn inline-block px-5 py-2.5 font-medium border-b-2 rounded-t-lg transition-all border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="combined-tab-content">
+                      <i class="fas fa-object-group mr-2"></i>
+                      Combined Summary
+                    </button>
+                  </li>
+                  <li>
+                    <button id="individual-tab" class="tab-btn inline-block px-5 py-2.5 font-medium border-b-2 rounded-t-lg transition-all border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="individual-tab-content">
+                      <i class="fas fa-th-list mr-2"></i>
+                      Individual Responses
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              
+              <!-- Tab content -->
+              <div id="combined-tab-content" class="tab-content">
+                <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-100">
+                  <div class="combined-response prose max-w-none" id="combined-response">
+                    <!-- Combined response will be inserted here -->
+                  </div>
+                </div>
+              </div>
+              
+              <div id="individual-tab-content" class="tab-content">
+                <div class="space-y-6" id="individual-responses">
+                  <!-- Individual responses will be inserted here -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Welcome section -->
+          <div
+            id="welcome-section"
+            class="bg-white rounded-lg shadow-sm p-8 text-center border border-gray-100 fade-in"
+          >
+            <div class="inline-block bg-primary-50 p-5 rounded-full mb-5">
+              <i class="fas fa-search-plus text-5xl text-primary-500"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-3">
+              Welcome to AI Question Summarizer
+            </h2>
+            <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+              Enter a question or topic above and our AI models will each provide their own response.
+              Gemini will then combine all insights into a comprehensive summarized answer.
+            </p>
+            <div
+              class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 max-w-3xl mx-auto"
+            >
+              <div
+                class="bg-primary-50 p-4 rounded-lg border border-primary-100 transition-all duration-200 hover:shadow-md"
+              >
+                <i class="fas fa-robot text-primary-500 text-xl mb-2"></i>
+                <p class="text-sm text-gray-700 font-medium">
+                  Multiple AI perspectives
+                </p>
+              </div>
+              <div
+                class="bg-primary-50 p-4 rounded-lg border border-primary-100 transition-all duration-200 hover:shadow-md"
+              >
+                <i class="fas fa-object-group text-primary-500 text-xl mb-2"></i>
+                <p class="text-sm text-gray-700 font-medium">Combined insights</p>
+              </div>
+              <div
+                class="bg-primary-50 p-4 rounded-lg border border-primary-100 transition-all duration-200 hover:shadow-md"
+              >
+                <i class="fas fa-bolt text-primary-500 text-xl mb-2"></i>
+                <p class="text-sm text-gray-700 font-medium">Fast analysis</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer
+        class="bg-white border-t border-gray-200 py-3 text-center text-gray-500 text-sm"
+      >
+        <p>© 2024 AI Question Summarizer | Designed by Ishan</p>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        // DOM Elements
+        const sidebar = document.getElementById("sidebar");
+        const toggleSidebarBtn = document.getElementById("toggle-sidebar");
+        const questionInput = document.getElementById("question-input");
+        const summarizeBtn = document.getElementById("summarize-btn");
+        const loadingIndicator = document.getElementById("loading");
+        const resultsSection = document.getElementById("results");
+        const welcomeSection = document.getElementById("welcome-section");
+        const combinedResponse = document.getElementById("combined-response");
+        const individualResponses = document.getElementById("individual-responses");
+        const questionDisplay = document.getElementById("question-display");
+        const tabButtons = document.querySelectorAll(".tab-btn");
+        const tabContents = document.querySelectorAll(".tab-content");
+        
+        // State
+        let sidebarVisible = true;
+        
+        // Event Listeners
+        toggleSidebarBtn.addEventListener("click", toggleSidebar);
+        summarizeBtn.addEventListener("click", getSummarizedResponse);
+        
+        /**
+         * Toggles the sidebar visibility
+         */
+        function toggleSidebar() {
+          if (sidebarVisible) {
+            sidebar.classList.add("-ml-64");
+            sidebar.classList.remove("ml-0");
+          } else {
+            sidebar.classList.remove("-ml-64");
+            sidebar.classList.add("ml-0");
+          }
+          sidebarVisible = !sidebarVisible;
+        }
+        
+        // Set up tab switching
+        tabButtons.forEach(button => {
+          button.addEventListener("click", () => {
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => {
+              btn.classList.remove("tab-active", "border-primary-600", "text-primary-700");
+              btn.classList.add("border-transparent", "text-gray-500", "hover:text-gray-700", "hover:border-gray-300");
+            });
+            
+            tabContents.forEach(content => {
+              content.classList.remove("active");
+            });
+            
+            // Add active class to clicked button and corresponding content
+            button.classList.add("tab-active", "border-primary-600", "text-primary-700");
+            button.classList.remove("border-transparent", "text-gray-500", "hover:text-gray-700", "hover:border-gray-300");
+            
+            const tabId = button.getAttribute("data-tab");
+            document.getElementById(tabId).classList.add("active");
+          });
+        });
+        
+        /**
+         * Fetches summarized responses from the API
+         */
+        function getSummarizedResponse() {
+          const questionText = questionInput.value.trim();
+          
+          if (!questionText) {
+            alert("Please enter a question or topic.");
+            return;
+          }
+          
+          // Show loading, hide other sections
+          loadingIndicator.classList.remove("hidden");
+          welcomeSection.classList.add("hidden");
+          resultsSection.classList.add("hidden");
+          
+          // Set the question display
+          questionDisplay.textContent = questionText;
+          
+          // Call API
+          fetch("/summarize", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user: questionText }),
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then(data => {
+            displayResults(data, questionText);
+          })
+          .catch(error => {
+            console.error("Error:", error);
+            combinedResponse.innerHTML = `
+              <div class="bg-red-100 text-red-700 p-4 rounded-lg">
+                <h3 class="font-bold">Error</h3>
+                <p>${error.message}</p>
+              </div>
+            `;
+            
+            // Show results with error
+            loadingIndicator.classList.add("hidden");
+            resultsSection.classList.remove("hidden");
+          });
+        }
+        
+        /**
+         * Displays the API results
+         */
+        function displayResults(data, questionText) {
+          // Hide loading
+          loadingIndicator.classList.add("hidden");
+          
+          // Reset content areas
+          combinedResponse.innerHTML = "";
+          individualResponses.innerHTML = "";
+          
+          // Display combined response
+          combinedResponse.innerHTML = data.combined_response;
+          
+          // Display individual responses
+          const modelColors = {
+            "deepseek-chat": "bg-blue-50 border-blue-200 text-blue-800",
+            "chatgpt-4o-latest": "bg-green-50 border-green-200 text-green-800",
+            "google/gemini-2.0-flash": "bg-purple-50 border-purple-200 text-purple-800",
+            "x-ai/grok-3-beta": "bg-orange-50 border-orange-200 text-orange-800",
+            "claude-3-sonnet-20240229": "bg-indigo-50 border-indigo-200 text-indigo-800",
+            "gpt-4o": "bg-teal-50 border-teal-200 text-teal-800"
+          };
+          
+          const modelNames = {
+            "deepseek-chat": "DeepSeek",
+            "chatgpt-4o-latest": "ChatGPT",
+            "google/gemini-2.0-flash": "Gemini",
+            "x-ai/grok-3-beta": "Grok",
+            "claude-3-sonnet-20240229": "Claude",
+            "gpt-4o": "GPT-4o"
+          };
+          
+          Object.entries(data.individual_responses).forEach(([model, response]) => {
+            const colorClass = modelColors[model] || "bg-gray-50 border-gray-200 text-gray-800";
+            const displayName = modelNames[model] || model;
+            
+            individualResponses.innerHTML += `
+              <div class="border rounded-lg shadow-sm overflow-hidden mb-6">
+                <div class="flex items-center px-4 py-3 ${colorClass} border-b">
+                  <i class="fas fa-robot mr-2 text-primary-500"></i>
+                  <span class="font-medium">${displayName}</span>
+                </div>
+                <div class="px-4 py-3 bg-white">
+                  <p>${formatResponse(response)}</p>
+                </div>
+              </div>
+            `;
+          });
+          
+          // Show results section
+          resultsSection.classList.remove("hidden");
+          
+          // Switch to combined tab
+          document.getElementById("combined-tab").click();
+        }
+        
+        /**
+         * Formats API response text with line breaks
+         */
+        function formatResponse(text) {
+          if (!text) return "<em>No response</em>";
+          return escapeHTML(text)
+            .replace(/\n\n/g, "</p><p>")
+            .replace(/\n/g, "<br>");
+        }
+        
+        /**
+         * Escapes HTML special characters
+         */
+        function escapeHTML(text) {
+          const div = document.createElement("div");
+          div.textContent = text;
+          return div.innerHTML;
+        }
+      });
+    </script>
+  </body>
+</html> 

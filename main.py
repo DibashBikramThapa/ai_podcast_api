@@ -10,6 +10,7 @@ from utils import settings
 
 from core.podcast import AI_Podcast
 from core.schema import PodcastQuery
+from core.summarizer import AI_Summarizer
 
 app = FastAPI()
 
@@ -45,6 +46,27 @@ def read_item(podcast_q: PodcastQuery):
         return {
                 "message": "AI message received",
                 "data": resp
+                }
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.get("/summarize-page")
+def summarize_page(request: Request):
+    """Serve the summarization page"""
+    return templates.TemplateResponse("summarize.html", {"request": request})
+
+@app.post("/summarize")
+def summarize(podcast_q: PodcastQuery):
+    try:
+        payload = {
+            'user_prompt': podcast_q.user
+        }
+        ai_summarizer = AI_Summarizer(payload=payload)
+        individual_responses, combined_response = ai_summarizer.start()
+        return {
+                "message": "Summarization completed",
+                "individual_responses": individual_responses,
+                "combined_response": combined_response
                 }
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
