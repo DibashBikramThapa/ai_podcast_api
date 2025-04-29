@@ -168,6 +168,22 @@
       </div>
 
       <div class="p-4 border-t border-primary-700">
+        <h2 class="text-primary-300 text-xs font-semibold uppercase tracking-wider mb-3">
+          Navigation
+        </h2>
+        <nav class="mb-4">
+          <a href="/" class="flex items-center px-4 py-2 text-white bg-primary-700 rounded-md mb-2 transition-colors">
+            <i class="fas fa-podcast mr-3"></i>
+            <span>Podcast Generator</span>
+          </a>
+          <a href="/summarize-page" class="flex items-center px-4 py-2 text-white hover:bg-primary-700 rounded-md mb-2">
+            <i class="fas fa-search-plus mr-3"></i>
+            <span>Question Summarizer</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="p-4 border-t border-primary-700">
         <button
           id="clear-history"
           class="w-full py-2.5 bg-red-500 hover:bg-red-600 rounded-md text-white font-medium transition-colors duration-200 flex items-center justify-center"
@@ -197,10 +213,13 @@
               AI Podcast Generator
             </h1>
           </div>
-          <a href="/summarize-page" class="ml-6 text-primary-600 hover:text-primary-700 flex items-center gap-2">
+          <!-- <a
+            href="/summarize-page"
+            class="ml-6 text-primary-600 hover:text-primary-700 flex items-center gap-2"
+          >
             <i class="fas fa-search-plus text-xl"></i>
             <span class="font-medium">Summarizer</span>
-          </a>
+          </a> -->
         </div>
       </header>
 
@@ -328,7 +347,10 @@
       <footer
         class="bg-white border-t border-gray-200 py-3 text-center text-gray-500 text-sm"
       >
-        <p>© 2024 AI Podcast Generator | Designed by Ishan</p>
+        <p>
+          © 2024 AI Podcast Generator | Developed by
+          <a href="https://neuralevo.com" target="_blank">Neural Evo</a>
+        </p>
       </footer>
     </div>
 
