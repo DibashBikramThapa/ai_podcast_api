@@ -48,7 +48,7 @@ class AI_Podcast:
             completion = api.chat.completions.create(
                 model=self.model.value,
                 messages=new_msg,
-                max_tokens=256,
+                # max_tokens=256,
             )
             resp = completion.choices[0].message.content
         except Exception as e:
