@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Personality Admin</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#F0F7FF",
+                100: "#E0EFFF",
+                200: "#C0DFFF",
+                300: "#90C8FF",
+                400: "#5AA6FF",
+                500: "#2185FF",
+                600: "#0065E0",
+                700: "#0052B3",
+                800: "#004299",
+                900: "#003380",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* Custom scrollbar for better visual appeal */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* Animations */
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 h-screen flex overflow-hidden font-sans">
+    <!-- Sidebar -->
+    <div
+      class="w-64 bg-primary-800 text-white flex flex-col h-screen transition-all duration-300 shadow-lg"
+      id="sidebar"
+    >
+      <div class="p-4 border-b border-primary-700 flex items-center">
+        <i class="fas fa-sliders-h text-2xl mr-3 text-primary-300"></i>
+        <h1 class="text-xl font-semibold">Admin Panel</h1>
+      </div>
+
+      <!-- Navigation Menu -->
+      <div class="p-4 border-t border-primary-700 mt-auto">
+        <h2
+          class="text-primary-300 text-xs font-semibold uppercase tracking-wider mb-3"
+        >
+          Navigation
+        </h2>
+        <nav class="mb-4">
+          <a
+            href="/"
+            class="flex items-center px-4 py-2 text-white hover:bg-primary-700 rounded-md mb-2 transition-colors"
+          >
+            <i class="fas fa-podcast mr-3"></i>
+            <span>Podcast Generator</span>
+          </a>
+          <a
+            href="/summarize-page"
+            class="flex items-center px-4 py-2 text-white hover:bg-primary-700 rounded-md mb-2"
+          >
+            <i class="fas fa-search-plus mr-3"></i>
+            <span>Question Summarizer</span>
+          </a>
+          <a
+            href="/admin"
+            class="flex items-center px-4 py-2 text-white bg-primary-700 rounded-md mb-2"
+          >
+            <i class="fas fa-cog mr-3"></i>
+            <span>Personality Admin</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <!-- Header -->
+      <header
+        class="bg-white shadow-sm p-4 flex items-center justify-between border-b border-gray-200"
+      >
+        <div class="flex items-center">
+          <button
+            id="toggle-sidebar"
+            class="mr-4 text-gray-500 hover:text-primary-600 p-1 rounded-md"
+          >
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <div class="flex items-center">
+            <i class="fas fa-user-cog text-primary-500 text-2xl mr-3"></i>
+            <h1 class="text-2xl font-semibold text-gray-800">
+              AI Personality Configuration
+            </h1>
+          </div>
+        </div>
+        <div>
+          <button
+            id="save-all-btn"
+            class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md flex items-center font-medium transition-colors duration-200 shadow-sm"
+          >
+            <i class="fas fa-save mr-2"></i>
+            <span>Save All</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Admin Content -->
+      <div class="flex-1 overflow-y-auto p-6 bg-gray-50" id="content-area">
+        <div class="max-w-6xl mx-auto">
+          <div class="mb-6 fade-in">
+            <div
+              class="bg-primary-50 border-l-4 border-primary-500 p-4 rounded-md mb-6"
+            >
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-info-circle text-primary-500"></i>
+                </div>
+                <div class="ml-3">
+                  <p class="text-primary-700">
+                    Customize the personality prompts for each AI model. These
+                    prompts will be used as system messages to guide how each AI
+                    responds in the podcast conversations.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end mb-4 space-x-3">
+              <button
+                id="reset-btn"
+                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md flex items-center font-medium transition-colors duration-200"
+              >
+                <i class="fas fa-undo mr-2"></i>
+                <span>Reset to Defaults</span>
+              </button>
+            </div>
+
+            <!-- Personality Forms -->
+            <div id="personality-forms" class="space-y-6">
+              <!-- Forms will be added here dynamically -->
+              <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-spinner fa-spin text-4xl mb-3"></i>
+                <p>Loading personality configurations...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer
+        class="bg-white border-t border-gray-200 py-3 text-center text-gray-500 text-sm"
+      >
+        <p>
+          © 2024 AI Podcast Generator | Developed by
+          <a href="https://neuralevo.com" target="_blank">Neural Evo</a>
+        </p>
+      </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div
+      id="toast"
+      class="fixed top-4 right-4 px-4 py-3 bg-green-500 text-white rounded-lg shadow-lg transform transition-transform duration-300 scale-0 flex items-center"
+    >
+      <i class="fas fa-check-circle mr-2"></i>
+      <span id="toast-message">Settings saved successfully!</span>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // DOM Elements
+        const sidebar = document.getElementById("sidebar");
+        const toggleSidebarBtn = document.getElementById("toggle-sidebar");
+        const personalityForms = document.getElementById("personality-forms");
+        const saveAllBtn = document.getElementById("save-all-btn");
+        const resetBtn = document.getElementById("reset-btn");
+        const toast = document.getElementById("toast");
+        const toastMessage = document.getElementById("toast-message");
+
+        // State
+        let sidebarVisible = true;
+        let personalities = {};
+        let modelNames = {
+          "deepseek-chat": "DeepSeek",
+          "chatgpt-4o-latest": "ChatGPT",
+          "google/gemini-2.0-flash": "Gemini",
+          "x-ai/grok-3-beta": "Grok",
+          "claude-3-sonnet-20240229": "Claude",
+          "gpt-4o": "GPT-4o",
+        };
+        let modelColors = {
+          "deepseek-chat": "blue",
+          "chatgpt-4o-latest": "green",
+          "google/gemini-2.0-flash": "purple",
+          "x-ai/grok-3-beta": "orange",
+          "claude-3-sonnet-20240229": "indigo",
+          "gpt-4o": "teal",
+        };
+
+        // Initialize
+        loadPersonalities();
+
+        // Event Listeners
+        toggleSidebarBtn.addEventListener("click", toggleSidebar);
+        saveAllBtn.addEventListener("click", saveAllPersonalities);
+        resetBtn.addEventListener("click", resetPersonalities);
+
+        /**
+         * Toggles the sidebar visibility
+         */
+        function toggleSidebar() {
+          if (sidebarVisible) {
+            sidebar.classList.add("-ml-64");
+            sidebar.classList.remove("ml-0");
+          } else {
+            sidebar.classList.remove("-ml-64");
+            sidebar.classList.add("ml-0");
+          }
+          sidebarVisible = !sidebarVisible;
+        }
+
+        /**
+         * Loads personalities from the API
+         */
+        function loadPersonalities() {
+          fetch("/api/personalities")
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to load personalities");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              personalities = data;
+              renderPersonalityForms();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showToast(
+                "Failed to load personalities. Please refresh the page.",
+                "error"
+              );
+              personalityForms.innerHTML = `
+                <div class="bg-red-50 border-red-200 border rounded-md p-6 text-center">
+                  <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-3"></i>
+                  <p class="text-red-700 mb-2">Failed to load personality configurations</p>
+                  <button onclick="location.reload()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-md text-sm">
+                    Refresh Page
+                  </button>
+                </div>
+              `;
+            });
+        }
+
+        /**
+         * Renders the personality forms based on loaded data
+         */
+        function renderPersonalityForms() {
+          personalityForms.innerHTML = "";
+
+          // Sort models by name for consistent display
+          const sortedModels = Object.keys(personalities).sort(
+            (a, b) => modelNames[a]?.localeCompare(modelNames[b]) || 0
+          );
+
+          sortedModels.forEach((modelId) => {
+            const modelName = modelNames[modelId] || modelId;
+            const personality = personalities[modelId] || "";
+            const colorName = modelColors[modelId] || "gray";
+
+            const formHtml = `
+              <div class="bg-white rounded-lg shadow-sm border border-${colorName}-100 overflow-hidden">
+                <div class="bg-${colorName}-50 p-4 border-b border-${colorName}-100 flex justify-between items-center">
+                  <div class="flex items-center">
+                    <i class="fas fa-robot text-${colorName}-500 text-xl mr-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-800">${modelName} Personality</h3>
+                  </div>
+                  <div class="text-xs text-gray-500 font-mono">${modelId}</div>
+                </div>
+                <div class="p-4">
+                  <textarea
+                    id="personality-${modelId}"
+                    class="w-full p-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 resize-none"
+                    rows="4"
+                    placeholder="Enter personality prompt for ${modelName}..."
+                  >${personality}</textarea>
+                  <div class="mt-3 flex justify-between items-center">
+                    <div class="text-xs text-gray-500">
+                      <i class="fas fa-info-circle mr-1"></i>
+                      This text serves as the system prompt for ${modelName}
+                    </div>
+                    <button 
+                      data-model-id="${modelId}"
+                      class="save-single-btn bg-${colorName}-100 hover:bg-${colorName}-200 text-${colorName}-800 px-3 py-1.5 rounded-md text-sm flex items-center"
+                    >
+                      <i class="fas fa-save mr-2"></i>
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+
+            personalityForms.innerHTML += formHtml;
+          });
+
+          // Add event listeners for individual save buttons
+          document.querySelectorAll(".save-single-btn").forEach((button) => {
+            button.addEventListener("click", function () {
+              const modelId = this.getAttribute("data-model-id");
+              const textarea = document.getElementById(`personality-${modelId}`);
+              saveSinglePersonality(modelId, textarea.value);
+            });
+          });
+        }
+
+        /**
+         * Saves a single personality to the API
+         */
+        function saveSinglePersonality(modelId, personality) {
+          fetch("/api/personalities/update", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model_id: modelId,
+              personality: personality,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to save personality");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data.success) {
+                personalities[modelId] = personality;
+                showToast(
+                  `${modelNames[modelId] || modelId} personality updated!`
+                );
+              } else {
+                throw new Error("Failed to save personality");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showToast(
+                `Failed to save ${modelNames[modelId] || modelId} personality.`,
+                "error"
+              );
+            });
+        }
+
+        /**
+         * Saves all personalities to the API
+         */
+        function saveAllPersonalities() {
+          const updatedPersonalities = {};
+
+          // Get all values from textareas
+          document.querySelectorAll("[id^='personality-']").forEach((textarea) => {
+            const modelId = textarea.id.replace("personality-", "");
+            updatedPersonalities[modelId] = textarea.value;
+          });
+
+          fetch("/api/personalities/update-all", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              personalities: updatedPersonalities,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to save personalities");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data.success) {
+                personalities = updatedPersonalities;
+                showToast("All personalities saved successfully!");
+              } else {
+                throw new Error("Failed to save personalities");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showToast("Failed to save personalities.", "error");
+            });
+        }
+
+        /**
+         * Resets all personalities to defaults
+         */
+        function resetPersonalities() {
+          if (
+            !confirm(
+              "Are you sure you want to reset all personalities to their defaults?"
+            )
+          ) {
+            return;
+          }
+
+          fetch("/api/personalities/reset", {
+            method: "POST",
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to reset personalities");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data.success) {
+                loadPersonalities(); // Reload all personalities
+                showToast("All personalities reset to defaults!");
+              } else {
+                throw new Error("Failed to reset personalities");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showToast("Failed to reset personalities.", "error");
+            });
+        }
+
+        /**
+         * Shows a toast notification
+         */
+        function showToast(message, type = "success") {
+          toastMessage.textContent = message;
+          
+          if (type === "error") {
+            toast.classList.remove("bg-green-500");
+            toast.classList.add("bg-red-500");
+          } else {
+            toast.classList.remove("bg-red-500");
+            toast.classList.add("bg-green-500");
+          }
+          
+          toast.classList.remove("scale-0");
+          toast.classList.add("scale-100");
+          
+          setTimeout(() => {
+            toast.classList.remove("scale-100");
+            toast.classList.add("scale-0");
+          }, 3000);
+        }
+      });
+    </script>
+  </body>
+</html> 

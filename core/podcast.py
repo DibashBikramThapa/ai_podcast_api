@@ -2,11 +2,17 @@ from openai import OpenAI
 
 from utils.enum import AI_API_KEYS, AI_Model
 from utils.settings import HOST
+from utils.personality_manager import PersonalityManager
 
 base_url = f"{HOST}/v1"
 api_key = AI_API_KEYS.AI_ML.value
-system_prompt = "Act like a human in a podcast. Provide your opinions and more insights on other assistant content."
+personality_manager = PersonalityManager()
 api = OpenAI(api_key=api_key, base_url=base_url)
+
+PODCAST_PROMPT = """
+You are a human in a podcast. Provide your opinions and more insights on other assistant content. 
+Your answer should be in plain text, no formatting or markdown. Keep it like a spoken text
+"""
 
 
 class AI_Podcast:
@@ -19,10 +25,16 @@ class AI_Podcast:
         except ValueError:
             raise ValueError("Invalid ai model.")
         self.model = key
+        # Get custom personality for this model
+        self.system_prompt = (
+            personality_manager.get_personality(self.model.value)
+            + "\n\n"
+            + PODCAST_PROMPT
+        )
 
     def execute(self):
         messages = [
-            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": self.system_prompt},
             {"role": "user", "content": self.user_prompt},
         ]
         if self.prev_prompt:
